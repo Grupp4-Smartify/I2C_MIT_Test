@@ -3,7 +3,7 @@
 
 int bState;
 int buttonPin = 2;
-int aPin[2]= {5,6};
+int aPin[3]= {5,6,7};
 int count;
 int buzzer = 4;
 
@@ -12,6 +12,7 @@ boolean aOn;
 boolean aOff;
 boolean alarm;
 boolean stopFlag;
+const byte slaveId = 1;
 
 
 
@@ -23,47 +24,22 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(buttonPin), stopAlarm, CHANGE);
   pinMode(aPin[0], INPUT);
   pinMode(aPin[1], INPUT);
+  pinMode(aPin[2], INPUT);
+  pinMode(aPin[3], INPUT);
   bFlag = true;
   aOn = true;
   aOff = true;
   alarm = false;
   stopFlag = true;
+  Wire.onRequest(requestEvent);
+  Wire.onReceive(receiveEvent);
 
 }
 
 
 
 void loop() {
-
-  if(aOff){
-    aOff = false;
-    Serial.println("Alarm: Off");
-    aOn = true;
-  }
-
-  while(bMode() && stopFlag){
-
-    if(aOn){
-      aOn = false;
-      Serial.println("Alarm: On");
-      aOff = true;
-    }
-
-    alarmState();
-    
-    if(alarm){
-      Serial.println("Alarm!!!");
-      tone(buzzer, 4000,100);
-      noTone;
-      delay(500);
-      tone(buzzer, 4000,100);
-      noTone;
-      delay(500);
-
-
-  stopFlag = true;
-    }
-  }
+  
 }
 
 void stopAlarm(){
@@ -72,8 +48,8 @@ void stopAlarm(){
 }
 
 boolean alarmState(){
- for(int i;i<2;i++){
-  if(digitalRead(aPin[i]) == HIGH){
+ for(int i;i<3;i++){
+  if(digitalRead(aPin[i]) == LOW){
     alarm = true;
   }
  }
@@ -95,3 +71,42 @@ int bMode() {
   return count;
 
 }
+
+void requestEvent(){
+  
+  if(aOff){
+    aOff = false;
+    Wire.println("Alarm: Off");
+    aOn = true;
+  }
+
+  while(bMode() && stopFlag){
+
+    if(aOn){
+      aOn = false;
+      Wire.println("Alarm: On");
+      aOff = true;
+    }
+
+    alarmState();
+    
+    if(alarm){
+      Wire.println("Alarm!!!");
+      tone(buzzer, 4000,100);
+      noTone;
+      delay(500);
+      tone(buzzer, 4000,100);
+      noTone;
+      delay(500);
+
+
+  stopFlag = true;
+    }
+  }
+ 
+  }
+
+void receiveEvent(){
+    
+  }
+
