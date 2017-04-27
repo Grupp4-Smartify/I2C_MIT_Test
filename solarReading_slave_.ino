@@ -80,8 +80,8 @@ byte tracking3[8] = {
   B00100
 };
 
-int xPos;
-int yPos;
+float V;
+int count = 0;
 
 String readString;
 
@@ -96,6 +96,8 @@ void setup(){
   lcd.createChar(4, tracking1);
   lcd.createChar(5, tracking2);
   lcd.createChar(6, tracking3);
+
+  pinMode(A0, INPUT);
   
   Wire.begin(slaveId);
   Wire.onReceive(receiveEvent);
@@ -115,32 +117,91 @@ void setup(){
   standbyPrint();
   Serial.begin(9600); 
   Wire.begin();
+
+  printCurrent();
   
 }
 
 void loop(){ 
+   V = voltage();
+   //lcd.setCursor(8,1);
+   //lcd.print("   ");
+   if(V>=5){
+    lcd.setCursor(8,1);
+    lcd.print("Max");
+   }else{ 
+     lcd.setCursor(8,1);
+     lcd.print(V,1);
+   }
+   
+}
+
+float voltage(){
+  float v,a,vTot,mArray[18],temp;
+  a = (5.0/1023.0);
   
+  for(int i=0;i<18;i++){
+  v = analogRead(A0);
+  mArray[i] = v*a;
+  }
+  for(int m=0;m<18;m++){
+    for(int n=0;n<m-1;n++){
+      if(mArray[n]>mArray[n+1]){
+        temp = mArray[n];
+        mArray[n] = mArray[n+1];
+        mArray[n+1] = temp;
+      }
+    }
+  } 
+  count++;
+  if(count==300){
+    count = 0;
+    return mArray[9];
+  }
 }
 
-void standbyPrint(){
-   lcd.setCursor(0,0);
-   lcd.write("          ");
-   lcd.setCursor(0,0);
-   lcd.write("Standby");
+void printCurrent(){  
+   lcd.setCursor(0,1);
+   delay(1);
+   lcd.print("              ");
+   lcd.setCursor(0,1);
+   delay(1);
+   lcd.print("Current:");
+   lcd.setCursor(11,1);
+   delay(1);
+   lcd.print("V");
+   lcd.print("  ");
 }
 
-void autoPrint(){
+void standbyPrint(){ 
    lcd.setCursor(0,0);
-   lcd.write("          ");
+   delay(1);
+   lcd.print("            ");
    lcd.setCursor(0,0);
-   lcd.write("Auto");
+   lcd.print("Standby       ");
+   printCurrent();
+   printSun();
 }
 
-void manualPrint(){
+void autoPrint(){  
    lcd.setCursor(0,0);
-   lcd.write("          ");
+   lcd.print("            ");
    lcd.setCursor(0,0);
-   lcd.write("Manual");
+   delay(1);
+   lcd.print("Auto          ");
+   printCurrent();
+   printSun();
+}
+
+void manualPrint(){  
+   lcd.setCursor(0,0);
+   delay(1);
+   lcd.print("             ");
+   lcd.setCursor(0,0);
+   delay(1);
+   lcd.print("Manual        ");
+   printCurrent();
+   printSun();
 }
 
 void printSun(){
@@ -170,6 +231,5 @@ char inChar;
   if(inChar == 'm'){    
     Serial.println("Manual"); 
     manualPrint();
-  }
-    //readString="";
+  } 
 }
