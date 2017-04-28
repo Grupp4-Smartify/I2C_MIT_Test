@@ -1,6 +1,6 @@
 #include <Wire.h>
 
-int bState;
+byte bState;
 int buttonPin = 2;
 int aPin[3]={6,7,8};
 int pirSensor = 3;
@@ -8,9 +8,6 @@ int count;
 int countL;
 int buzzer = 4;
 int ledPin = 9;
-
-
-int test;
 
 boolean pirOn;
 boolean buttonOff;
@@ -30,7 +27,7 @@ void setup() {
   delay(3000);
   Serial.begin(9600);
   pinMode(buttonPin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(buttonPin), stopAlarm, CHANGE);
+ // attachInterrupt(digitalPinToInterrupt(buttonPin), stopAlarm, CHANGE);
   pinMode(aPin[0], INPUT);
   pinMode(aPin[1], INPUT);
   pinMode(aPin[2], INPUT);
@@ -58,12 +55,12 @@ void loop() {
     aOn = true;
   }
 
-  while(bMode() && stopFlag || on && stopFlag){
+  while(on && stopFlag){
    alarmLoop();
   }
  }
 
-
+/*
 void stopAlarm(){
   //Serial.println("Interrupt");
   alarm = false;
@@ -71,6 +68,7 @@ void stopAlarm(){
   buttonOff = true;
   digitalWrite(ledPin, LOW);
 }
+*/
 
 
 void hallState(){
@@ -92,17 +90,18 @@ void pirState (){
 
 
 
-int bMode() {
+/*int bMode() {
   
   bState = digitalRead(buttonPin);
-  if (bState == HIGH && bFlag == true) {
+  bState = bState^1;
+  if (bState == 1 && bFlag == true) {
     count++;
     if (count >= 2) {
       count = 0;
     }
     bFlag = false;
   } 
-  else if (bState == LOW && bFlag == false) {
+  else if (bState == 0 && bFlag == false) {
     bFlag = true;
   }
   if(buttonOff == true){
@@ -112,6 +111,7 @@ int bMode() {
      return count;
   }
 }
+*/
 
 
 void alarmLoop(){
@@ -124,7 +124,7 @@ void alarmLoop(){
     }
     
      countL++;
-     if(countL == 200){
+     if(countL == 20000){
       countL = 0;
       state = state^1;
       digitalWrite(ledPin, state);
@@ -133,7 +133,6 @@ void alarmLoop(){
     hallState();
     if(pirOn == true){
     pirState();
-    
     }
     
     if(alarm){
@@ -165,13 +164,13 @@ void receiveEvent(int howMany){
       inChar = Wire.read();
       if (inChar == 'H'){
         on = true;
-        buttonOff = false;
+      //  buttonOff = false;
         }
        if(inChar == 'L'){
         on = false;
         alarm = false;
-        buttonOff = true;
-        pirOn = false;
+       //  buttonOff = true;
+         pirOn = false;
         digitalWrite(ledPin, LOW);
         }
         if(inChar == 'X'){
