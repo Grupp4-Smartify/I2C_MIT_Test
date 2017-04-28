@@ -81,6 +81,7 @@ byte tracking3[8] = {
 };
 
 float V;
+char C;
 int count = 0;
 
 String readString;
@@ -125,6 +126,14 @@ void setup(){
 
 void loop(){ 
    V = voltage();
+   if(V<2){
+    C = 'R';
+   }
+   else if(V>= 2 && V<4){
+    C = 'Y';
+   }else{
+    C = 'G';
+   }
    //lcd.setCursor(8,1);
    //lcd.print("   ");
    if(V>=5){
@@ -138,22 +147,10 @@ void loop(){
 }
 
 void requestEvent(){ 
-  Serial.println("-1");
-  if(V<2){ 
-    float Send;
-    Send = V+'/'+'R';
-    Wire.print('1'); 
-  }
-  else if(V>=2 && V<=4){
-    float Send;
-    Send = V+'/'+'Y';
-    Wire.print('2'); 
-  }
-  else{
-    float Send;
-    Send = V+'/'+'G';
-    Wire.print('3'); 
-  }
+  //Serial.println("-1");
+  Wire.print(V);
+  Wire.print("/");
+  Wire.print(C); 
 }
 
 float voltage(){
