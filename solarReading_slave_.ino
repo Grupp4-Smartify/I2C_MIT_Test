@@ -100,6 +100,7 @@ void setup(){
   pinMode(A0, INPUT);
   
   Wire.begin(slaveId);
+  Wire.onRequest(requestEvent);
   Wire.onReceive(receiveEvent);
   Serial.begin(9600);  
 
@@ -134,6 +135,25 @@ void loop(){
      lcd.print(V,1);
    }
    
+}
+
+void requestEvent(){ 
+  Serial.println("-1");
+  if(V<2){ 
+    float Send;
+    Send = V+'/'+'R';
+    Wire.print('1'); 
+  }
+  else if(V>=2 && V<=4){
+    float Send;
+    Send = V+'/'+'Y';
+    Wire.print('2'); 
+  }
+  else{
+    float Send;
+    Send = V+'/'+'G';
+    Wire.print('3'); 
+  }
 }
 
 float voltage(){
